@@ -6,3 +6,5 @@ xgboost
 pandas
 numpy
 joblib
+SQLAlchemy
+psycopg2-binary # Driver cho PostgreSQL
