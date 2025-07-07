@@ -120,7 +120,7 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         else:
             # Dự đoán
             predicted_aqi_log = prediction_model.predict(input_df_featured)
-            aqi_value = round(np.expm1(predicted_aqi_log)[0], 2)
+            aqi_value = float(np.expm1(predicted_aqi_log)[0], 2)
             status = "Success"
     
     # Lưu record vào database
@@ -136,7 +136,7 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         humidity=data.humidity,
         co2=data.co2,
         # Lưu kết quả
-        predicted_aqi=aqi_value,
+        predicted_aqi=float(aqi_value) if aqi_value is not None else None,
         status=status
     )
     db.add(db_record)
