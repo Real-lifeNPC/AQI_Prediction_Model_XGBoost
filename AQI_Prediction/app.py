@@ -52,10 +52,13 @@ def get_db():
 
 # --- Tải Models và các hàm chức năng ---
 try:
-prediction_model = joblib.load('xgb_model.joblib')
-anomaly_model = joblib.load('anomaly_detector.joblib')
+    prediction_model = joblib.load('xgb_model.joblib')
+    anomaly_model = joblib.load('anomaly_detector.joblib')
 except FileNotFoundError:
     print("Lỗi: Không tìm thấy file model. Hãy đảm bảo xgb_model.joblib và anomaly_detector.joblib có trong thư mục.")
+    # Bạn có thể thêm xử lý lỗi ở đây
+    prediction_model = None
+    anomaly_model = None
 # ... hàm create_new_features giữ nguyên ...
 def create_new_features(df_input): # Copy paste hàm của bạn vào đây
     df_output = df_input.copy()
