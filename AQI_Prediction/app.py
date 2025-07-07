@@ -105,8 +105,13 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         aqi_value = None
     else:
         # Tạo DataFrame và features
-        input_df = pd.DataFrame([data.dict()])
-        input_df_featured = create_new_features(input_df.drop('device_id', axis=1))
+        df_for_model = pd.DataFrame({
+        'PM2.5': [data.pm25],
+        'NH3': [data.nh3],
+        'CO': [data.co],
+        'Toluene': [data.toluene]
+        })
+        input_df_featured = create_new_features(df_for_model)
 
         # Kiểm tra bất thường
         if anomaly_model.predict(input_df_featured)[0] == -1:
