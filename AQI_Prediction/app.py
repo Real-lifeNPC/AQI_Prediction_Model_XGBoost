@@ -143,7 +143,31 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
     db.commit()
     
     return {"message": "Data received successfully."}
+    
+def get_aqi_category(aqi_value):
+    """
+    Phân loại giá trị AQI số thành các mức độ ô nhiễm.
+    """
+    if aqi_value is None:
+        return "Không xác định"
+    
+    aqi = int(aqi_value) # Chuyển thành số nguyên để so sánh
 
+    if 0 <= aqi <= 50:
+        return "Tốt"
+    elif 51 <= aqi <= 100:
+        return "Trung bình"
+    elif 101 <= aqi <= 150:
+        return "Kém"
+    elif 151 <= aqi <= 200:
+        return "Xấu"
+    elif 201 <= aqi <= 300:
+        return "Rất xấu"
+    elif aqi > 300:
+        return "Nguy hại"
+    else:
+        return "Không xác định"
+        
 @app.get("/get-latest-aqi/{device_id}")
 def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
     """
@@ -153,14 +177,31 @@ def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
     
     if not latest_record:
         return {"error": "No data found for this device."}
+
+    # Lấy giá trị AQI và tính toán category
+    aqi_value = latest_record.predicted_aqi
+    aqi_category = get_aqi_category(aqi_value)    
+
+    # Xử lý trường hợp có cảnh báo
+    if latest_record.status.startswith("Warning"):
+        aqi_category = latest_record.status # Trả về chính cảnh báo đó
+        aqi_value = None # Không hiển thị giá trị số nếu có cảnh báo
         
-    return {
-        "device_id": latest_record.device_id,
-        "predicted_aqi": latest_record.predicted_aqi,
-        "status": latest_record.status,
-        # Trả về cả các thông tin môi trường
-        "temperature": latest_record.temperature,
-        "humidity": latest_record.humidity,
-        "co2": latest_record.co2,
-        "last_updated": latest_record.timestamp.isoformat()
+    # Xây dựng cấu trúc JSON trả về
+    response_data = {
+        "timestamp": latest_record.timestamp.isoformat() + "Z", # Thêm Z để chỉ múi giờ UTC
+        "data": {
+            "pm25": latest_record.pm25_in,
+            "nh3": latest_record.nh3_in,
+            "co": latest_record.co_in,
+            "toluene": latest_record.toluene_in,
+            "temperature": latest_record.temperature,
+            "humidity": latest_record.humidity,
+            "co2": latest_record.co2,
+        },
+        "aqi": {
+            "value": aqi_value,
+            "category": aqi_category
+        }
     }
+    return response_data
