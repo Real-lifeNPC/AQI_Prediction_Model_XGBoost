@@ -33,6 +33,8 @@ class AqiRecord(Base):
     temperature = Column(Float, nullable=True)
     humidity = Column(Float, nullable=True)
     co2 = Column(Float, nullable=True)
+
+    fire_alert = Column(Boolean, default=False) 
      
     # Kết quả dự đoán
     predicted_aqi = Column(Float, nullable=True)
@@ -80,6 +82,8 @@ class SensorData(BaseModel):
     nh3: float
     co: float
     toluene: float
+
+    fire_alert: bool = False 
     
     # Additional environmental data
     temperature: float | None = None # Dùng | None để cho phép giá trị này có thể không được gửi
@@ -135,6 +139,9 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         temperature=data.temperature,
         humidity=data.humidity,
         co2=data.co2,
+
+        fire_alert=data.fire_alert,
+        
         # Lưu kết quả
         predicted_aqi=float(aqi_value) if aqi_value is not None else None,
         status=status
@@ -190,6 +197,9 @@ def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
     # Xây dựng cấu trúc JSON trả về
     response_data = {
         "timestamp": latest_record.timestamp.isoformat() + "Z", # Thêm Z để chỉ múi giờ UTC
+        
+        "fire_alert": latest_record.fire_alert,
+        
         "data": {
             "pm25": latest_record.pm25_in,
             "nh3": latest_record.nh3_in,
