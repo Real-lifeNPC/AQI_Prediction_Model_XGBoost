@@ -124,7 +124,7 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         else:
             # Dự đoán
             predicted_aqi_log = prediction_model.predict(input_df_featured)
-            aqi_value = float(np.expm1(predicted_aqi_log)[0], 2)
+            aqi_value = round(float(np.expm1(predicted_aqi_log)[0]), 2)
             status = "Success"
     
     # Lưu record vào database
