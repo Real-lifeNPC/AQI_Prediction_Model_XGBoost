@@ -124,7 +124,9 @@ def submit_sensor_data(data: SensorData, db: Session = Depends(get_db)):
         else:
             # Dự đoán
             predicted_aqi_log = prediction_model.predict(input_df_featured)
-            aqi_value = round(float(np.expm1(predicted_aqi_log)[0]), 2)
+            aqi_as_float = float(np.expm1(predicted_aqi_log)[0])
+            # Làm tròn thành số nguyên gần nhất
+            aqi_value = int(round(aqi_as_float)) 
             status = "Success"
     
     # Lưu record vào database
@@ -210,8 +212,9 @@ def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
             "co2": latest_record.co2,
         },
         "aqi": {
-            "value": aqi_value,
+            "value": int(aqi_value) if aqi_value is not None else None,
             "category": aqi_category
         }
     }
     return response_data
+
