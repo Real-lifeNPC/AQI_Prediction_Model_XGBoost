@@ -193,7 +193,7 @@ def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
 
     # Xử lý trường hợp có cảnh báo
     if latest_record.status.startswith("Warning"):
-        aqi_category = latest_record.status # Trả về chính cảnh báo đó
+        aqi_category = "Dữ liệu đầu vào bất thường, chỉ số AQI dự đoán không đáng tin cậy" # Trả về chính cảnh báo đó
         aqi_value = None # Không hiển thị giá trị số nếu có cảnh báo
         
     # Xây dựng cấu trúc JSON trả về
@@ -217,4 +217,5 @@ def get_latest_aqi_data(device_id: str, db: Session = Depends(get_db)):
         }
     }
     return response_data
+
 
